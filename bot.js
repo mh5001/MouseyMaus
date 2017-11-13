@@ -41,7 +41,9 @@ client.on("ready", function() {
           }, function (err, result) {
             image = result.images[1];
             if (news.includes(title)) return;
-            if (news.includes(image)) return image = 'https://i.imgur.com/VgLcA06.png'
+            if (news.includes(image)) {
+              image = 'https://i.imgur.com/VgLcA06.png'
+            }
             fs.writeFileSync('./news.txt', `${title}|${image}`);
             client.guilds.get('366915317496152075').channels.get('366949235545079818').send({embed: {
               color: 8242912,
