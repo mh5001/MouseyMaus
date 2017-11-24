@@ -27,6 +27,11 @@ client.on('guildMemberAdd', function(user) {
   authenticate(user);
 });
 
+process.on('error', err => {
+  console.log(err);
+  return;
+});
+
 process.on('unhandledRejection', (err) => {
   return;
 });
@@ -148,6 +153,7 @@ client.on('message', function(message) { //Message event!
       ]
     }});
   } else if (mess.startsWith(prefix + 'purge')) {
+    if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (!message.member.hasPermission("ADMINISTRATOR")) return;
     const input = message.content.split(' ').slice(1)[0];
     message.channel.bulkDelete(input);
