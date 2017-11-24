@@ -16,6 +16,8 @@ googl.setKey(config.google);
 
 const allRole = [role.eu,role.na,role.ru,role.asia,role.xbox,role.playstation,role.blitz];
 var nick;
+var accID;
+var accToken;
 
 client.on('ready', function() {
   process.setMaxListeners(5);
@@ -640,42 +642,62 @@ function authenticate(member) {
                   }
                   nick = res.text.substring(res.text.indexOf('nickname=') + 9, res.text.indexOf('nickname=') + 39).replace('</span>','');
                   nick = nick.split('&').slice(0,1).join('');
+                  accToken = res.text.substring(res.text.indexOf('access_token=') + 13,res.text.indexOf('access_token=') + 60);
+                  accToken = accToken.split('&').slice(0,1).join('');
+                  accID = res.text.substring(res.text.indexOf('account_id=') + 11,res.text.indexOf('account_id=') + 20);
+                  accID = accID.split('&').slice(0,1).join('');
                   clearInterval(check);
-                  member.send({embed: {
-                    color: 1039662,
-                    title: "You are all set!",
-                    description: `**You have successfully connected your Wargaming account!**\nYour nickname on server: **${nick}**\nYour region role: **${region}**`,
-                    fields: [
-                      {
-                        name: "Optional commands:",
-                        value: "**!n**: Add/edit your nickname\n**!clan**: Show/hide your in-game clan tag\n**!update-clan**: Update your clan tag"
-                      }
-                    ]
-                  }});
-                  if (member.roles.exists('id', role.guest)) return member.removeRole(role.guest, "Had Authenticated!");
-                  clearInterval(check);
-                  member.setNickname(nick).catch(err => {
-                    if (err) {
-                      return message.channel.send({embed: {
-                        title: "Error changing nickname!",
-                        description: "Nickname is too long or bot doesn't have nicknaming permissions.",
+                  if (region == "XBOX (Console)" || region == "PLAYSTATION (Console)") {
+                    url = `https://${domain}.worldoftanks.com/wotx/account/info/?application_id=${wgAPI}&access_token=${accToken}&account_id=${accID}`;
+                  } else {
+                    url = `https://api.worldoftanks.${domain}/wot/account/info/?application_id=${wgAPI}&access_token=${accToken}&account_id=${accID}`;
+                  }
+                  snek.get(url).then(res => {
+                    const input = JSON.parse(res.text);
+                    if (input.data[accID].private == null || input.status !== 'ok') {
+                      clearInterval(check);
+                      return member.send({embed: {
+                        title: "Error! This is not your nickname!",
+                        description: "Please stop trying to break my bot or have a fake nickname!",
                         color: 15535630
                       }});
+                    } else {
+                      member.send({embed: {
+                        color: 1039662,
+                        title: "You are all set!",
+                        description: `**You have successfully connected your Wargaming account!**\nYour nickname on server: **${nick}**\nYour region role: **${region}**`,
+                        fields: [
+                          {
+                            name: "Optional commands:",
+                            value: "**!n**: Add/edit your nickname\n**!clan**: Show/hide your in-game clan tag\n**!update-clan**: Update your clan tag"
+                          }
+                        ]
+                      }});
+                      if (member.roles.exists('id', role.guest)) return member.removeRole(role.guest, "Had Authenticated!");
+                      member.setNickname(nick).catch(err => {
+                        if (err) {
+                          return message.channel.send({embed: {
+                            title: "Error changing nickname!",
+                            description: "Nickname is too long or bot doesn't have nicknaming permissions.",
+                            color: 15535630
+                          }});
+                        }
+                      });
+                      if (domain == 'eu') {
+                        member.addRole(role.eu);
+                      } else if (domain == 'com') {
+                        member.addRole(role.na);
+                      } else if (domain == 'ru') {
+                        member.addRole(role.ru);
+                      } else if (domain == 'asia') {
+                        member.addRole(role.asia);
+                      } else if (domain == 'api-xbox-console') {
+                        member.addRole(role.xbox);
+                      } else if (domain == 'api-ps4-console') {
+                        member.addRole(role.playstation);
+                      }
                     }
                   });
-                  if (domain == 'eu') {
-                    member.addRole(role.eu);
-                  } else if (domain == 'com') {
-                    member.addRole(role.na);
-                  } else if (domain == 'ru') {
-                    member.addRole(role.ru);
-                  } else if (domain == 'asia') {
-                    member.addRole(role.asia);
-                  } else if (domain == 'api-xbox-console') {
-                    member.addRole(role.xbox);
-                  } else if (domain == 'api-ps4-console') {
-                    member.addRole(role.playstation);
-                  }
                   return clearInterval(check);
                 }
               });
