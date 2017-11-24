@@ -10,6 +10,9 @@
     "google-translate-api": "^2.3.0",
     "node-lame": "^1.0.4"
   },
+  "engines": {
+    "node": "8.0.0"
+  },
   "main": "bot.js",
   "devDependencies": {},
   "scripts": {
