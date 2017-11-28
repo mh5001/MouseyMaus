@@ -177,7 +177,7 @@ client.on('message', function(message) { //Message event!
     message.channel.send({embed: {
       title: "Decide what to do with your roles:",
       color: 1039662,
-      description: "React: ➕ to **add** roles.\nReact: ➖ to **remove** roles.\nReact ❌ to exit."
+      description: "React: ➕ to **add** roles.\nReact: ➖ to **remove** roles.\nReact ❌ to cancel."
     }}).then(message => {
       message.react('➕').then(() => {
         message.react('➖').then(() => {
@@ -589,7 +589,6 @@ function authenticate(member) {
             url = `https://${domain}.worldoftanks.com/wotx/auth/login/?application_id=${wgAPI}&nofollow=1&redirect_uri=${receive}`;
           } else {
             url = `https://api.worldoftanks.${domain}/wot/auth/login/?application_id=${wgAPI}&nofollow=1&redirect_uri=${receive}`;
-            console.log(receive + '?&status=ok&access_token=2df537ceb5b9d1e3d81fd37ba5fe57a4798b6d65&nickname=Forcellrus&account_id=518552414&expires_at=1512554742');
           }
           snek.get(url)
           .then(res => {
@@ -693,7 +692,7 @@ function authenticate(member) {
                           color: 15535630
                         }});
                       }
-                    },500);
+                    },1000);
                   }
                 }
               });
@@ -745,6 +744,8 @@ function authCheck(nickname, domain, accID, accToken) {
   }
   snek.get(url).then(res => {
     const user = JSON.parse(res.text);
+    console.log(user.data[accID].nickname);
+    console.log(nickname);
     if (user.data[accID].nickname !== nickname) return returnStatement = false;
     if (user.data[accID].private == null) return returnStatement = false;
     if (user.error) return returnStatement = false;
