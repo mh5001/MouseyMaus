@@ -652,6 +652,15 @@ function authenticate(member) {
                     authCheck(nick,domain,accID,accToken);
                     setTimeout(() => {
                       if (returnStatement) {
+                        member.setNickname(nick).catch(err => {
+                          if (err) {
+                            return message.channel.send({embed: {
+                              title: "Error changing nickname!",
+                              description: "Nickname is too long or bot doesn't have nicknaming permissions.",
+                              color: 15535630
+                            }});
+                          }
+                        });
                         return member.send({embed: {
                           color: 1039662,
                           title: "You are all set!",
@@ -677,15 +686,6 @@ function authenticate(member) {
                           member.addRole(role.playstation);
                         }
                         if (member.roles.exists('id', role.guest)) return member.removeRole(role.guest, "Had Authenticated!");
-                        member.setNickname(nick).catch(err => {
-                          if (err) {
-                            return message.channel.send({embed: {
-                              title: "Error changing nickname!",
-                              description: "Nickname is too long or bot doesn't have nicknaming permissions.",
-                              color: 15535630
-                            }});
-                          }
-                        });
                       } else {
                         return member.send({embed: {
                           title: "Error! This is not your nickname!",
