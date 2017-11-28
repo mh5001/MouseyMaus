@@ -744,8 +744,6 @@ function authCheck(nickname, domain, accID, accToken) {
   }
   snek.get(url).then(res => {
     const user = JSON.parse(res.text);
-    console.log(user.data[accID].nickname);
-    console.log(nickname);
     if (user.data[accID].nickname !== nickname) return returnStatement = false;
     if (user.data[accID].private == null) return returnStatement = false;
     if (user.error) return returnStatement = false;
