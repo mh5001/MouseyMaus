@@ -45,6 +45,7 @@ client.on('message', function(message) { //Message event!
   message.delete();
   if (mess.startsWith(prefix + 'n')) { //When a user change nickname
     const nick = message.content.split(' ').slice(1).join(' ');
+    if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (nick.length == 0) {
       setName(message.member,message.member.displayName.split(' |').slice(0,1).join(''),message.channel);
       return;
@@ -59,7 +60,6 @@ client.on('message', function(message) { //Message event!
       title : 'Invalid Nickname!',
       description: "Your nickname can only consist of Latin characters, numbers, and underscores. This also applies to Guests."
     }});
-    if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) {
       setName(message.member,nick,message.channel);
       return;
@@ -113,6 +113,7 @@ client.on('message', function(message) { //Message event!
     message.channel.bulkDelete(parseInt(input) + 1);
     const member = message.member;
   } else if (mess.startsWith(prefix + 'role')) { //When a user want to edit their role
+    if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) return message.channel.send({embed: {
       title: "Error!",
       color: 15535630,
@@ -126,7 +127,7 @@ client.on('message', function(message) { //Message event!
       }});
     }
     const member = message.member;
-    message.channel.send({embed: {
+    message.member.send({embed: {
       title: "Decide what to do with your roles:",
       color: 1039662,
       description: "React: ➕ to **add** roles.\nReact: ➖ to **remove** roles.\nReact ❌ to cancel."
