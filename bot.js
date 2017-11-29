@@ -46,66 +46,26 @@ client.on('message', function(message) { //Message event!
   if (mess.startsWith(prefix + 'n')) { //When a user change nickname
     const nick = message.content.split(' ').slice(1).join(' ');
     if (nick.length == 0) {
-      message.member.setNickname(message.member.displayName.split(' |').slice(0,1).join('')).catch(err => {
-        if (err) {
-          clearTimeout(success);
-          return message.channel.send({embed: {
-            title: "Error changing nickname!",
-            description: "Nickname is too long or bot doesn't have nicknaming permissions.",
-            color: 15535630
-          }});
-        }
-      });
-      const success = setTimeout(() => {
-        message.channel.send({embed: {
-          color: 1039662,
-          title: "Your nickname has been reset!",
-          description: `New nickname: ${message.member.displayName.split(' |').slice(0,1).join('')}`
-        }});
-      },300);
+      setName(message.member,message.member.displayName.split(' |').slice(0,1).join(''),message.channel);
       return;
     }
+    if (nick.match(/\w|\ /g) == null) return message.channel.send({embed: {
+      color: 15535630,
+      title : 'Invalid Nickname!',
+      description: "Your nickname can only consist of Latin characters, numbers, and underscores. This also applies to Guests."
+    }});
+    if (nick.match(/\w|\ /g).length !== nick.split('').length) return message.channel.send({embed: {
+      color: 15535630,
+      title : 'Invalid Nickname!',
+      description: "Your nickname can only consist of Latin characters, numbers, and underscores. This also applies to Guests."
+    }});
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) {
-      message.member.setNickname(nick).catch(err => {
-        if (err) {
-          clearTimeout(success);
-          return message.channel.send({embed: {
-            title: "Error changing nickname!",
-            description: "Nickname is too long or bot doesn't have nicknaming permissions.",
-            color: 15535630
-          }});
-        }
-      });
-      const success = setTimeout(() => {
-        return message.channel.send({embed: {
-          title: "Success!",
-          color: 1039662,
-          description: `New Nickname: ${nick}`
-        }});
-      });
+      setName(message.member,nick,message.channel);
       return;
     }
-    const name = `${message.member.displayName.split(' |').slice(0,1).join('')} | ${nick}`;
-    message.member.setNickname(name)
-    .catch(err => {
-      if (err) {
-        clearTimeout(success);
-        return message.channel.send({embed: {
-          title: "Error changing nickname!",
-          color: 15535630,
-          description: "Nickname is too long or bot doesn't have nicknaming permissions.",
-          color: 15535630
-        }});
-      }
-    });
-    const success = setTimeout(() => {
-      message.channel.send({embed: {
-        color: 1039662,
-        title: "Success!",
-        description: `New nickname: ${name}`
-      }});
-    },300);
+    const name = `${message.member.displayName.split('|').slice(0,1).join('').trim()} | ${nick}`;
+    setName(message.member,name,message.channel);
   } else if (mess.startsWith(prefix + 'clan')) { //When a user do clan command
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) return message.channel.send({embed: {
@@ -121,15 +81,7 @@ client.on('message', function(message) { //Message event!
       color: 15535630,
       description: "This command can't be used as Guest"
     }});
-    message.member.setNickname(message.member.displayName.replace(/\[[^\]]*\]/,'')).catch(err => {
-      if (err) {
-        return message.channel.send({embed: {
-          title: "Error changing nickname!",
-          description: "Nickname is too long or bot doesn't have nicknaming permissions.",
-          color: 15535630
-        }});
-      }
-    });
+    setName(message.member,message.member.displayName.replace(/\[[^\]]*\]/,''),message.channel);
     clan(message);
   } else if (mess.startsWith(prefix + 'update-auth')) { //When a user update authentication
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
@@ -158,7 +110,7 @@ client.on('message', function(message) { //Message event!
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (!message.member.hasPermission("ADMINISTRATOR")) return;
     const input = message.content.split(' ').slice(1)[0];
-    message.channel.bulkDelete(input);
+    message.channel.bulkDelete(parseInt(input) + 1);
     const member = message.member;
   } else if (mess.startsWith(prefix + 'role')) { //When a user want to edit their role
     if (message.member.roles.exists("id", role.guest)) return message.channel.send({embed: {
@@ -295,13 +247,24 @@ function domain(region) {
   if (region == 'na') return 'US';
   if (region == 'ru') return 'RU';
   if (region == 'asia') return 'SEA';
+  if (region == 'xbox') return 'XBOX';
+  if (region == 'ps') return 'PS4';
   return false;
 }
 
 //Hide or show clan tag
 function clan (message) {
   if (message.member.displayName.split('|').slice(0,1).join('').includes('[')) {
-    message.member.setNickname(message.member.displayName.replace(/\[[^\]]*\]/,'')).catch(err => {
+    const ign = message.member.displayName.split('|').slice(0,1).join('').replace(/\[[^\]]*\]/,'').trim() + ' ';
+    const nick = message.member.displayName.split('|').slice(1,2);
+    var clearName;
+    if (nick.join('').replace(/\s/g,'') == '') {
+      clearName = ign;
+    } else {
+      clearName = ign + "|" + nick;
+    }
+    clearName = clearName.trim();
+    message.member.setNickname(clearName).catch(err => {
       if (err) {
         clearTimeout(success);
         return message.channel.send({embed: {
@@ -319,7 +282,7 @@ function clan (message) {
       }});
     },300);
   } else {
-    const name = message.member.displayName.split(' ').slice(0,1).join('');
+    const name = message.member.displayName.split('|').slice(0,1).join('').trim();
     const id = message.author.id;
     const roles = message.member.roles.array().slice(0,4);
     var region = [];
@@ -337,15 +300,22 @@ function clan (message) {
       });
     });
     if (regionName.length == 1) {
-      if (!domain(regionName[0])) return message.channel.send("Error! You can't have a clan on console or blitz");
+      if (!domain(regionName[0])) return message.channel.send("Error! You can't have a clan on blitz");
       snek.get(`http://www.wotinfo.net/en/efficiency?server=${domain(regionName[0])}&playername=${name}`)
       .then(res => {
         const text = res.text.substring(res.text.indexOf('clanoverview'),res.text.indexOf('clanoverview') + 50);
         const clan = text.match(/\>[^\<]*\</)[0].replace('>','[').replace('<',']');
         if (clan.replace('\n','') == '[]') return message.channel.send("You are not in a clan!");
-        var nickname = message.member.displayName.split(' ');
+        var nickname = message.member.displayName.split('|');
         nickname.splice(1,0,clan);
+        nickname.splice(2,0,'|');
         nickname = nickname.filter(ele => {return ele !== ''});
+        nickname = nickname.join(' ').trim();
+        if (nickname.split('|').slice(1).join('') == '') {
+          nickname = nickname.split('|').join('').trim();
+        }
+        nickname = nickname.split(' ');
+        nickname = nickname.filter(ele => {return ele !== ""});
         nickname = nickname.join(' ');
         message.member.setNickname(nickname).catch(err => {
           if (err) {
@@ -391,10 +361,10 @@ function clan (message) {
           const text = res.text.substring(res.text.indexOf('clanoverview'),res.text.indexOf('clanoverview') + 50);
           const clan = text.match(/\>[^\<]*\</)[0].replace('>','[').replace('<',']');
           if (clan.replace('\n','') == '[]') return message.channel.send("You are not in a clan!");
-          var nickname = input.first().member.displayName.split(' ');
+          var nickname = input.first().member.displayName.split('|');
           nickname.splice(1,0,clan);
           nickname = nickname.filter(ele => {return ele !== ''});
-          nickname = nickname.join(' ');
+          nickname = nickname.join(' ').trim();
           if (nickname.replace('[','').replace(']','') == '') return message.channel.send("You are not in a clan!");
           input.first().member.setNickname(nickname).catch(err => {
             if (err) {
@@ -749,4 +719,25 @@ function authCheck(nickname, domain, accID, accToken) {
     if (user.error) return returnStatement = false;
     return returnStatement = true;
   });
+}
+
+//Set name to member
+function setName(member,nick,channel) {
+  member.setNickname(nick).catch(err => {
+    if (err) {
+      clearTimeout(success);
+      return channel.send({embed: {
+        title: "Error changing nickname!",
+        description: "Nickname is too long or bot doesn't have nicknaming permissions.",
+        color: 15535630
+      }});
+    }
+  });
+  const success = setTimeout(() => {
+    channel.send({embed: {
+      color: 1039662,
+      title: "Your nickname has been changed!",
+      description: `New nickname: ${nick}`
+    }});
+  },300);
 }
