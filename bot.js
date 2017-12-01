@@ -43,7 +43,7 @@ client.on('message', function(message) { //Message event!
   if (!message.content.startsWith(prefix)) return;
   if(message.author.id == client.user.id) return;
   const mess = message.content.toLowerCase();
-  if (mess.startsWith(prefix + 'n ')) { //When a user change nickname
+  if (mess.startsWith(prefix + 'n')) { //When a user change nickname
     const nick = message.content.split(' ').slice(1).join(' ');
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (nick.length == 0) {
@@ -364,8 +364,15 @@ function clan (message) {
           if (clan.replace('\n','') == '[]') return message.channel.send("You are not in a clan!");
           var nickname = input.first().member.displayName.split('|');
           nickname.splice(1,0,clan);
+          nickname.splice(2,0,'|');
           nickname = nickname.filter(ele => {return ele !== ''});
           nickname = nickname.join(' ').trim();
+          if (nickname.split('|').slice(1).join('') == '') {
+            nickname = nickname.split('|').join('').trim();
+          }
+          nickname = nickname.split(' ');
+          nickname = nickname.filter(ele => {return ele !== ""});
+          nickname = nickname.join(' ');
           if (nickname.replace('[','').replace(']','') == '') return message.channel.send("You are not in a clan!");
           input.first().member.setNickname(nickname).catch(err => {
             if (err) {
