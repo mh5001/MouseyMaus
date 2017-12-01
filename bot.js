@@ -73,7 +73,7 @@ client.on('message', function(message) { //Message event!
       description: "This command can't be used as Guest"
     }});
     clan(message);
-  } else if (mess.startsWith(prefix + 'update-clan ')) { //When a user update clan
+  } else if (mess.startsWith(prefix + 'update-clan')) { //When a user update clan
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) return message.channel.send({embed: {
       title: "Error!",
@@ -82,11 +82,11 @@ client.on('message', function(message) { //Message event!
     }});
     setName(message.member,message.member.displayName.replace(/\[[^\]]*\]/,''),message.channel);
     clan(message);
-  } else if (mess.startsWith(prefix + 'update-auth ')) { //When a user update authentication
+  } else if (mess.startsWith(prefix + 'update-auth')) { //When a user update authentication
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     authenticate(message.member);
     message.channel.send(`<@${message.author.id}>, please check your DM.`);
-  } else if (mess.startsWith(prefix + 'help ')) { //when a user does the help command
+  } else if (mess.startsWith(prefix + 'help')) { //when a user does the help command
     message.channel.send(`<@${message.author.id}>, please check your DM.`);
     message.author.send({embed: {
       color: 1039662,
