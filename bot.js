@@ -42,8 +42,7 @@ client.on('message', function(message) { //Message event!
   if (!message.content.startsWith(prefix)) return;
   if(message.author.id == client.user.id) return;
   const mess = message.content.toLowerCase();
-  message.delete();
-  if (mess.startsWith(prefix + 'n')) { //When a user change nickname
+  if (mess.startsWith(prefix + 'n ')) { //When a user change nickname
     const nick = message.content.split(' ').slice(1).join(' ');
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (nick.length == 0) {
@@ -74,7 +73,7 @@ client.on('message', function(message) { //Message event!
       description: "This command can't be used as Guest"
     }});
     clan(message);
-  } else if (mess.startsWith(prefix + 'update-clan')) { //When a user update clan
+  } else if (mess.startsWith(prefix + 'update-clan ')) { //When a user update clan
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (message.member.roles.exists("id", role.guest)) return message.channel.send({embed: {
       title: "Error!",
@@ -83,11 +82,11 @@ client.on('message', function(message) { //Message event!
     }});
     setName(message.member,message.member.displayName.replace(/\[[^\]]*\]/,''),message.channel);
     clan(message);
-  } else if (mess.startsWith(prefix + 'update-auth')) { //When a user update authentication
+  } else if (mess.startsWith(prefix + 'update-auth ')) { //When a user update authentication
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     authenticate(message.member);
     message.channel.send(`<@${message.author.id}>, please check your DM.`);
-  } else if (mess.startsWith(prefix + 'help')) { //when a user does the help command
+  } else if (mess.startsWith(prefix + 'help ')) { //when a user does the help command
     message.channel.send(`<@${message.author.id}>, please check your DM.`);
     message.author.send({embed: {
       color: 1039662,
@@ -101,12 +100,12 @@ client.on('message', function(message) { //Message event!
           value: `**${prefix}update-auth**: Re-authenticate in case you've changed your in-game name.\n**${prefix}role**: Edit the roles you have.`
         },
         {
-          name: "__Admit Related__",
+          name: "__Admin Related__",
           value: `**${prefix}purge [Num]**: Delete messages in that channel.`
         }
       ]
     }});
-  } else if (mess.startsWith(prefix + 'purge')) {
+  } else if (mess.startsWith(prefix + 'purge ')) {
     if (message.guild == null) return message.channel.send("Please command me in a guild I'm in");
     if (!message.member.hasPermission("ADMINISTRATOR")) return;
     const input = message.content.split(' ').slice(1)[0];
@@ -622,6 +621,19 @@ function authenticate(member) {
                     authCheck(nick,domain,accID,accToken);
                     setTimeout(() => {
                       if (returnStatement) {
+                        if (domain == 'eu') {
+                          member.addRole(role.eu);
+                        } else if (domain == 'com') {
+                          member.addRole(role.na);
+                        } else if (domain == 'ru') {
+                          member.addRole(role.ru);
+                        } else if (domain == 'asia') {
+                          member.addRole(role.asia);
+                        } else if (domain == 'api-xbox-console') {
+                          member.addRole(role.xbox);
+                        } else if (domain == 'api-ps4-console') {
+                          member.addRole(role.playstation);
+                        }
                         member.setNickname(nick).catch(err => {
                           if (err) {
                             return message.channel.send({embed: {
@@ -642,19 +654,6 @@ function authenticate(member) {
                             }
                           ]
                         }});
-                        if (domain == 'eu') {
-                          member.addRole(role.eu);
-                        } else if (domain == 'com') {
-                          member.addRole(role.na);
-                        } else if (domain == 'ru') {
-                          member.addRole(role.ru);
-                        } else if (domain == 'asia') {
-                          member.addRole(role.asia);
-                        } else if (domain == 'api-xbox-console') {
-                          member.addRole(role.xbox);
-                        } else if (domain == 'api-ps4-console') {
-                          member.addRole(role.playstation);
-                        }
                         if (member.roles.exists('id', role.guest)) return member.removeRole(role.guest, "Had Authenticated!");
                       } else {
                         return member.send({embed: {
