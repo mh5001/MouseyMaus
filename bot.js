@@ -18,6 +18,7 @@ const allRole = [role.eu,role.na,role.ru,role.asia,role.xbox,role.playstation,ro
 var nick;
 var accID;
 var accToken;
+var domain;
 
 client.on('ready', function() {
   process.setMaxListeners(5);
@@ -459,7 +460,6 @@ function authenticate(member) {
       });
     });
     var region;
-    var domain;
     message.awaitReactions(reaction => {
       if (reaction.count > 1) {
         message.channel.send("Please wait...");
