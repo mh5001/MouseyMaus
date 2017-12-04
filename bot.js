@@ -4,8 +4,6 @@ const fs = require('fs');
 const client = new discord.Client();
 const requestbin = require('requestbin');
 const googl = require('goo.gl');
-const static = require('node-static');
-const file = new static.Server();
 
 const config = JSON.parse(fs.readFileSync('./settings.json'));
 const role = JSON.parse(fs.readFileSync('./role.json'));
@@ -22,7 +20,7 @@ var accID;
 var accToken;
 var domain;
 
-eval(fs.readFileSync('./authenticate.js', 'utf-8'));
+eval(fs.readFileSync('./auth.js', 'utf-8'));
 
 client.on('ready', function() {
   process.setMaxListeners(5);
@@ -123,7 +121,6 @@ client.on('message', function(message) { //Message event!
       color: 15535630,
       description: "This command can't be used as Guest"
     }});
-    message.channel.send(`<@${message.author.id}>, please check your DM!`);
     if (message.member.roles.array().length < 2) {
       return message.channel.send({embed: {
         title: "Error!",
@@ -173,43 +170,22 @@ client.on('message', function(message) { //Message event!
 
               message.awaitReactions(reaction => {
                 if (reaction.count > 1) {
-                  var choice;
                   message.delete();
                   if (reaction._emoji.id == emoji.eu) {
                     member.addRole(role.eu);
-                    choice = 'EU';
                   } else if (reaction._emoji.id == emoji.na) {
                     member.addRole(role.na);
-                    choice = 'NA';
                   } else if (reaction._emoji.id  == emoji.ru) {
                     member.addRole(role.ru);
-                    choice = 'RU';
                   } else if (reaction._emoji.id == emoji.asia) {
                     member.addRole(role.asia);
-                    choice = 'ASIA';
                   } else if (reaction._emoji.id == emoji.xbox) {
                     member.addRole(role.xbox);
-                    choice = 'Xbox'
                   } else if (reaction._emoji.id == emoji.ps) {
                     member.addRole(role.playstation);
-                    choice = 'Playstation';
                   } else if (reaction._emoji.id == emoji.blitz) {
                     member.addRole(role.blitz);
-                    choice = 'Blitz';
                   } else if (reaction._emoji.name == '❌') return;
-                  message.channel.send({embed: {
-                    title: "Success!",
-                    description: `You have added **${choice}** to your roles`,
-                    color: 1039662
-                  }});
-                }
-              },{
-                time: 60000,
-                errors: ['time']
-              }).catch(err => {
-                if (err) {
-                  message.delete();
-                  message.channel.send("Request timed out!");
                 }
               });
             });
@@ -240,50 +216,27 @@ client.on('message', function(message) { //Message event!
               });
               message.awaitReactions(reaction => {
                 if (reaction.count > 1) {
-                  var choice;
                   message.delete();
                   if (reaction._emoji.id == emoji.eu) {
                     member.removeRole(role.eu);
-                    choice = 'EU';
                   } else if (reaction._emoji.id == emoji.na) {
                     member.removeRole(role.na);
-                    choice = 'NA';
                   } else if (reaction._emoji.id  == emoji.ru) {
                     member.removeRole(role.ru);
-                    choice = 'RU';
                   } else if (reaction._emoji.id == emoji.asia) {
                     member.removeRole(role.asia);
-                    choice = 'ASIA';
                   } else if (reaction._emoji.id == emoji.xbox) {
                     member.removeRole(role.xbox);
-                    choice = 'Xbox';
                   } else if (reaction._emoji.id == emoji.ps) {
                     member.removeRole(role.playstation);
-                    choice = 'playstation';
                   } else if (reaction._emoji.id == emoji.blitz) {
                     member.removeRole(role.blitz);
-                    choice = 'Blitz';
                   } else if (reaction._emoji.name == '❌') return;
-                  message.channel.send({embed: {
-                    color: 1039662,
-                    title: "Success!",
-                    description: `You have removed ${choice} from your roles!`
-                  }});
                 }
-              }, {
-                time: 60000,
-                errors: ['time']
-              }).catch(err => {
-                message.channel.send('Request timed out!');
               });
             });
           } else if (reaction._emoji.name == '❌') return;
         }
-      },{
-        time: 60000,
-        errors: ['time']
-      }).catch(err => {
-        message.channel.send('Request timed out!');
       });
     });
   } else if (mess.startsWith(prefix + 'test')) {
