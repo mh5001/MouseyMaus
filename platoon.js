@@ -3,7 +3,15 @@ client.on('message', function(message) {
   if (!message.channel.name.startsWith('platoon')) return;
   if (message.author.id == client.user.id) return;
   const lower = message.content.toLowerCase();
-  if (lower.includes('plat')) {
+  if (lower.startsWith(prefix + 'stop-plat')) {
+    const id = message.author.id;
+    message.channel.send('Ending search...');
+    message.guild.members.get(id).removeRole(role.platoon);
+    count[message.channel.id] = [];
+    clearInterval(check);
+    message.channel.send('Timed out. Nobody wanna play with u, u loser!');//Waiting time of user is out
+  }
+  if (lower.includes('plat') && !lower.startsWith(prefix)) {
     const id = message.author.id;
     if(JSON.stringify(count).includes(id)) return message.channel.send('You already is in queue for a platoon!');
     var delay;

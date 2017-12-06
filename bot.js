@@ -22,7 +22,6 @@ var domain;
 
 eval(fs.readFileSync('./auth.js', 'utf-8'));
 eval(fs.readFileSync('./platoon.js', 'utf-8'));
-eval(fs.readFileSync('./ping.js', 'utf-8'));
 
 client.on('ready', function() {
   process.setMaxListeners(5);
