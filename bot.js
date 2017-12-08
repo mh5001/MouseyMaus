@@ -4,12 +4,54 @@ const fs = require('fs');
 const client = new discord.Client();
 const requestbin = require('requestbin');
 const googl = require('goo.gl');
+const ping = require('ping');
 
 const config = JSON.parse(fs.readFileSync('./settings.json'));
 const role = JSON.parse(fs.readFileSync('./role.json'));
 const emoji = JSON.parse(fs.readFileSync('./emoji.json'));
 const prefix = config.prefix;
 const wgAPI = config.wgApi;
+const wgPing = [
+  {
+    name: 'US East',
+    ip: '162.216.229.21'
+  },{
+    name: 'US West',
+    ip: '162.213.61.57'
+  },{
+    name: 'EU1 (Germany)',
+    ip: 'login.p1.worldoftanks.eu'
+  },{
+    name: 'EU2 (Netherlands)',
+    ip: 'login.p2.worldoftanks.eu'
+  },{
+    name: 'ASIA (Singapore)',
+    ip: 'login.worldoftanks.asia'
+  },{
+    name: 'RU1 (Russia)',
+    ip: 'login.p1.worldoftanks.net'
+  },{
+    name: 'RU2 (Russia)',
+    ip: 'login.p2.worldoftanks.net'
+  },{
+    name: 'RU3 (Germany)',
+    ip: 'login.p3.worldoftanks.net'
+  },{
+    name: 'RU4 (Russia)',
+    ip: 'login.p4.worldoftanks.net'
+  },{
+    name: 'RU5 (Russia)',
+    ip: 'login.p5.worldoftanks.net'
+  },{
+    name: 'RU6 (Russia)',
+    ip: 'login.p6.worldoftanks.net'
+  },{
+    name: 'RU7 (Netherlands)',
+    ip: 'login.p7.worldoftanks.net'
+  },{
+    name: 'KOREA (South Korea)',
+    ip: 'login.worldoftanks.kr'
+  }];
 
 client.login(config.token);
 googl.setKey(config.google);
@@ -242,6 +284,66 @@ client.on('message', function(message) { //Message event!
     });
   } else if (mess.startsWith(prefix + 'test')) {
     message.member.send('Test OK');
+  } else if (mess.startsWith(prefix + 'wot-ping')) {
+    var pingMes;
+    message.channel.send('Pinging all WoT game servers...').then(mes => {
+      pingMes = mes;
+    });
+    var result = []
+    wgPing.forEach(ele => {
+      ping.sys.probe(ele.ip, function(isAlive) {
+        if (isAlive) {
+          result.push({
+            name: ele.name,
+            result: '✅'
+          });
+        } else {
+          result.push({
+            name: ele.name,
+            result: '❎'
+          });
+        }
+      });
+    });
+    const check = setInterval(() => {
+      if (result.length == 13) {
+        pingMes.delete();
+        clearInterval(check);
+        const sorted = result.sort(function(a,b) {
+          var nameA = a.name.toUpperCase();
+          var nameB = b.name.toUpperCase();
+          if (nameA < nameB) {
+            return -1;
+          }
+          if (nameA > nameB) {
+            return 1;
+          }
+          return 0;
+        });
+        message.channel.send({embed: {
+          title: 'Pinging Completed!',
+          color: 1039662,
+          fields: [
+            {
+              name: '__EU Region:__',
+              value: `**${sorted[1].name}**: ${sorted[1].result}\n**${sorted[2].name}**: ${sorted[2].result}`
+            },{
+              name: '__US Region:__',
+              value: `**${sorted[11].name}**: ${sorted[11].result}\n**${sorted[12].name}**: ${sorted[12].result}`
+            },{
+              name: '__RU Region:__',
+              value: `**${sorted[4].name}**: ${sorted[4].result}\n**${sorted[5].name}**: ${sorted[5].result}\n**${sorted[6].name}**: ${sorted[6].result}\n**${sorted[7].name}**: ${sorted[7].result}\n**${sorted[8].name}**: ${sorted[8].result}\n**${sorted[9].name}**: ${sorted[9].result}\n**${sorted[10].name}**: ${sorted[10].result}`
+            },{
+              name: '__ASIA Region:__',
+              value: `**${sorted[0].name}**: ${sorted[0].result}`
+            },{
+              name: '__Korean Server:__',
+              value: `**${sorted[3].name}**: ${sorted[3].result}\n`
+            }
+          ]
+        }});
+      }
+    },1000);
   }
 });
 
