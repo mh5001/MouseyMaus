@@ -292,19 +292,19 @@ client.on('message', function(message) { //Message event!
     var result = []
     wgPing.forEach(ele => {
       ping.sys.probe(ele.ip, function(isAlive) {
-        if (isAlive) {
-          result.push({
-            name: ele.name,
-            result: '✅'
-          });
-        } else {
-          result.push({
-            name: ele.name,
-            result: '❎'
-          });
-        }
-      },{
-        timeout: 10
+        setTimeout(() => {
+          if (isAlive) {
+            result.push({
+              name: ele.name,
+              result: '✅'
+            });
+          } else {
+            result.push({
+              name: ele.name,
+              result: '❎'
+            });
+          }
+        },500);
       });
     });
     const check = setInterval(() => {
