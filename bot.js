@@ -286,7 +286,7 @@ client.on('message', function(message) { //Message event!
     message.member.send('Test OK');
   } else if (mess.startsWith(prefix + 'wot-ping')) {
     var pingMes;
-    message.channel.send('Pinging all WoT game servers...').then(mes => {
+    message.channel.send('Pinging all WoT game servers (Might take a while)...').then(mes => {
       pingMes = mes;
     });
     var result = []
@@ -303,6 +303,8 @@ client.on('message', function(message) { //Message event!
             result: '❎'
           });
         }
+      },{
+        timeout: 10
       });
     });
     const check = setInterval(() => {
